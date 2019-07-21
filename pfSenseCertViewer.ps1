@@ -1,8 +1,8 @@
 ####
 ### Extracting pfSense Certificates (without private key)
 ####
-# Redefine the $cfg string variable to point to a valid unecripted pfSense Configuration XML file.
-# You can also pass the command line FilePath parameter as path to the input XML cfg file
+# Redefine the $cfg string variable to point to a valid non encrypted pfSense XML configuration backup file.
+# You can also pass the command line FilePath parameter as path to the input XML cfg file.
 
 # The script will return the CA certificates, Server certificates, User certificated (used or not used) and duplicate Serial Number Certificates
 #
