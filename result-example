@@ -9,9 +9,9 @@ internal-ca 2F           city1        {city1}      city1      {revocados}
 internal-ca 30           audit03      {audit03}    audit03    {revocados}
 internal-ca 30           uaIntro      {uaIntro}    uaIntro
 internal-ca 31           city04       {city04}     city04
-internal-ca 31           uaDevice     {uaDevice}   uaDevice
+internal-ca 31           uaDevice(2)  {uaDevice}   uaDevice
 internal-ca 32           fperez       {fperez}     fperez
-internal-ca 32           uaExit       {uaExit}     uaExit
+internal-ca 32           uaExit(2)    {uaExit}     uaExit
 
 This is the last part of the result returned by the script: It shows duplicated SerialNumbers 2F, 30, 31 and 32
 To avoid issues when some of this certs is revoked, you must revoked all them, and recreate new certs forevery user involved.
