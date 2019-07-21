@@ -10,4 +10,5 @@ Last change 2017/07/21: New feature: Now it also shows the CRL(s) in which the c
 Thank to pippin (https://forum.netgate.com/user/pippin) for show me the links to the pfSense docummented issue:
 
 https://redmine.pfsense.org/issues/3694
+
 https://forum.netgate.com/topic/69978/generated-certificates-with-non-unique-serial-numbers/2
