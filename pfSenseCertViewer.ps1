@@ -49,19 +49,12 @@ Function Add-Lista {
 }
 
 
-#$CRL = New-Object -ComObject "X509Enrollment.CX509CertificateRevocationList"
-#$CRLContents = [System.Convert]::ToBase64String((Get-Content "C:\Users\ASG\Downloads\revocados.crl" -Encoding Byte))
-#[System.Security.Cryptography.X509Certificates.X509CRL2]$ccc = $null
-
-#https://msdnshared.blob.core.windows.net/media/2016/04/CRLFreshCheck.psm1_.txt
-
 #
 # BODY
 #
 
 #Read XML pfSense config file
-[string]$cfg = "$env:USERPROFILE\Downloads\config-pfSense01.casi.es.private.xml"
-#[string]$cfg = "C:\Users\ASG\Downloads\config-e.tecnube.es-20190630223501.xml"
+[string]$cfg = "$env:USERPROFILE\Downloads\config-pfSense01.private.xml"
 [xml]$aaa = Get-Content $cfg -Encoding Default
 
 #Get the CRL revocation list
