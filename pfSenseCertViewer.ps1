@@ -27,13 +27,24 @@ Function Add-Lista {
     foreach($c in $obj.Value) {
         $ccc = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($c.crt))
         $ccc.FriendlyName = $c.descr.'#cdata-section'
-        $lista.Value += $ccc | Select *, @{N='IsCA';E={$fromCA}} `
+        $objTmp = $ccc | Select *, @{N='IsCA';E={$fromCA}} `
                                   , @{N='IsServer';E={-not $fromCA -and $_.EnhancedKeyUsageList.ObjectId -contains $oidSRV}} `
                                   , @{N='IsClient';E={-not $fromCA -and $_.EnhancedKeyUsageList.ObjectId -contains $oidCLI}} `
                                   , @{N='sIssuer';E={Get-CN($_.Issuer)}}, @{N='sSubject';E={Get-CN($_.Subject)}} `
                                   , @{N='refid'; E={$c.refid}} `
-                                  , @{N='isRevoked'; E={-not $fromCA -and $c.refid -in $revs}}
-                                  #, @{N='refid'; E={$c.refid}}, @{N='isRevoked'; E={(-not $fromCA) -and ($_.refid -in $listaR.refid)}}
+                                  , @{N='isRevoked'; E={-not $fromCA -and $c.refid -in $revs}} `
+                                  , @{N='revokedOn'; Expression={$null}} `
+
+        if ($objTmp.isRevoked) {
+            [string[]]$strRev = @()
+            foreach($d in $listaR) {
+                if ($d.refid -eq $c.refid) {
+                    $strRev += [string]($d.listRev)
+                }
+            }
+            $objTmp.revokedOn = $strRev
+        }
+        $lista.Value += $objTmp
     }
 }
 
@@ -54,11 +65,11 @@ Function Add-Lista {
 [xml]$aaa = Get-Content $cfg -Encoding Default
 
 #Get the CRL revocation list
-[DateTime]$o = '1970-01-01'
+[DateTime]$time0 = '1970-01-01'
 #[array]$listaR = $aaa.pfsense.crl.cert | Select caref, refid, reason, @{N='revDate';E={$o.AddSeconds($_.revoke_time)}}
 [array]$listaR = @()
 foreach($r in $aaa.pfsense.crl) {
-    $listaR += $r.cert | Select @{N='listRev';E={$r.descr.'#cdata-section'}}, caref, refid, reason, @{N='revDate';E={$o.AddSeconds($_.revoke_time)}}
+    $listaR += $r.cert | Select @{N='listRev';E={$r.descr.'#cdata-section'}}, caref, refid, reason, @{N='revDate';E={$time0.AddSeconds($_.revoke_time)}}
 }
 
 #Add CA Certificates to $listaC (WITHOUT private keys)
@@ -77,12 +88,12 @@ $listaC | Where-Object {$_.isCA} | Select sIssuer, SerialNumber, FriendlyName, D
 
 #List of Server Certificates
 Write-Output "`nServer Certificates"
-$listaC | Where-Object {$_.isServer} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject | Sort-Object -Property sIssuer, SerialNumber | ft
+$listaC | Where-Object {$_.isServer} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
 
 #List of User Certificates (not CA and not Server)
 Write-Output "`nUser Certificates"
-$listaC | Where-Object {-not ($_.isCA -or $_.isServer)} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject | Sort-Object -Property sIssuer, SerialNumber | ft
+$listaC | Where-Object {-not ($_.isCA -or $_.isServer)} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
 
 #List of Dupicated SerialNumbers (per CA)
 Write-Output "`nDuplicated Serial Numbers (per CA)"
-$listaC | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject | Group-Object -Property sIssuer, SerialNumber | Where-Object {$_.Count -gt 1} | Select -ExpandProperty Group | ft
+$listaC | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Group-Object -Property sIssuer, SerialNumber | Where-Object {$_.Count -gt 1} | Select -ExpandProperty Group | ft
