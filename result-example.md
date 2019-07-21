@@ -59,9 +59,11 @@ You can show certs that will expire in the next 90 days
 
 $listaC | Where-Object {$_.NotAfter -le (Get-Date).AddDays(90)} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
 
+$listaC | Where-Object {$_.revokedOn -ne $null} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
+
 ---
 Or the list of revoked Certs
 
 $listaC | Where-Object {$_.revokedOn -ne $null} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
----
+
 And everything you want :)
