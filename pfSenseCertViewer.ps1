@@ -1,12 +1,25 @@
 ####
 ### Extracting pfSense Certificates (without private key)
 ####
-# Redefine the $cfg string variable to point to a valid unecripted pfSense Configuration XML file
+# Redefine the $cfg string variable to point to a valid unecripted pfSense Configuration XML file.
+# You can also pass the command line FilePath parameter as path to the input XML cfg file
+
 # The script will return the CA certificates, Server certificates, User certificated (used or not used) and duplicate Serial Number Certificates
 #
 # Tested on PowerShell 5 and avobe
 # Created by Alvaro Sedano Galindo. al_sedano@hotmail.com
 #
+
+#[CmdletBinding()]
+    Param (
+        [Parameter(Mandatory=$false,
+                        Position=0,
+                        ValueFromPipeline=$true,
+                        ValueFromPipelineByPropertyName=$true)]
+        [Alias("File")]
+        [string]$FilePath)
+
+
 
 Function Get-CN {
     Param([Parameter(Mandatory=$true)][string]$name)
@@ -53,26 +66,40 @@ Function Add-Lista {
 # BODY
 #
 
+# Check if param 0 is assigned
+if ($FilePath -eq $null -or $FilePath -eq '') {
+    [string]$cfg = "$env:USERPROFILE\Downloads\config-pfSense01.private.xml"
+}
+else {
+    # Use the FilePath console input parameter
+    [string]$cfg = $FilePath
+}
+
+
+if (-not (Test-Path -Path $cfg)) {
+    Write-Host "File '$cfg' not found. Process stopped." -BackgroundColor DarkRed
+    Exit 1
+}
+
 #Read XML pfSense config file
-[string]$cfg = "$env:USERPROFILE\Downloads\config-pfSense01.private.xml"
-[xml]$aaa = Get-Content $cfg -Encoding Default
+[xml]$fxml = Get-Content $cfg -Encoding Default
 
 #Get the CRL revocation list
 [DateTime]$time0 = '1970-01-01'
 [array]$listaR = @()
-foreach($r in $aaa.pfsense.crl) {
+foreach($r in $fxml.pfsense.crl) {
     $listaR += $r.cert | Select @{N='listRev';E={$r.descr.'#cdata-section'}}, caref, refid, reason, @{N='revDate';E={$time0.AddSeconds($_.revoke_time)}}
 }
 
 #Add CA Certificates to $listaC (WITHOUT private keys)
 [array]$listaC = @()
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$aaa.pfsense.ca) -fromCA $true
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.ca) -fromCA $true
 
 #Add user/server certificates to $listaC (WITHOUT private keys)
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$aaa.pfsense.cert) -fromCA $false
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.cert) -fromCA $false
 #Note: User Certificates created with old pfSense versions can set the EnhancedKeyUsageList property to <empty>
 
-Remove-Variable aaa, r
+Remove-Variable fxml, r
 
 #List of CA Certificates
 Write-Output "`nCA Certificates"
