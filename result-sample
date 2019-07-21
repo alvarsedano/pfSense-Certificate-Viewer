@@ -1,0 +1,21 @@
+
+
+Duplicated Serial Numbers (per CA)
+
+sIssuer     SerialNumber FriendlyName DnsNameList  sSubject   revokedOn
+-------     ------------ ------------ -----------  --------   ---------
+internal-ca 2F           hsanchez     {hsanchez}   hsanchez
+internal-ca 2F           city1        {city1}      city1      {revocados}
+internal-ca 30           audit03      {audit03}    audit03    {revocados}
+internal-ca 30           uaIntro      {uaIntro}    uaIntro
+internal-ca 31           city04       {city04}     city04
+internal-ca 31           uaDevice     {uaDevice}   uaDevice
+internal-ca 32           fperez       {fperez}     fperez
+internal-ca 32           uaExit       {uaExit}     uaExit
+
+This is the last part of the result returned by the script: It shows duplicated SerialNumbers 2F, 30, 31 and 32
+To avoid issues when some of this certs is revoked, you must revoked all them, and recreate new certs forevery user involved.
+
+As example: The execution result shows that the "city1" and "audit03" certs are revoked in the "revocados" CRL.
+But due to the duplicity of SerialNumbers, the openVPN tunnel that uses "revocados" as CRL also will consider revoked
+the certs "hsanchez" and "uaIntro".
