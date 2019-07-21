@@ -59,7 +59,6 @@ Function Add-Lista {
 
 #Get the CRL revocation list
 [DateTime]$time0 = '1970-01-01'
-#[array]$listaR = $aaa.pfsense.crl.cert | Select caref, refid, reason, @{N='revDate';E={$o.AddSeconds($_.revoke_time)}}
 [array]$listaR = @()
 foreach($r in $aaa.pfsense.crl) {
     $listaR += $r.cert | Select @{N='listRev';E={$r.descr.'#cdata-section'}}, caref, refid, reason, @{N='revDate';E={$time0.AddSeconds($_.revoke_time)}}
