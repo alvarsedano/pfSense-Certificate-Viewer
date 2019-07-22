@@ -21,9 +21,9 @@ But due to the duplicity of SerialNumbers, the openVPN tunnel that uses "revocad
 the certs "hsanchez" and "uaIntro".
 
 every item of $listaC has these attributes:
-
+```powershell
 PS C:\Users\me\Documents> $listaC[56]
-
+```
 EnhancedKeyUsageList : {Client Authentication (1.3.6.1.5.5.7.3.2)}
 DnsNameList          : {uaDedicated01}
 SendAsTrustedIssuer  : False
@@ -56,14 +56,12 @@ revokedOn            : {revocados, revCAcert}
 
 ---
 You can show certs that will expire in the next 90 days
-
+```powershell
 $listaC | Where-Object {$_.NotAfter -le (Get-Date).AddDays(90)} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
-
-$listaC | Where-Object {$_.revokedOn -ne $null} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
-
+```
 ---
 Or the list of revoked Certs
-
+```powershell
 $listaC | Where-Object {$_.revokedOn -ne $null} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | ft
-
+```
 And everything you want :)
