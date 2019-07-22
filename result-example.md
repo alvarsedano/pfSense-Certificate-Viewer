@@ -31,7 +31,7 @@ EnhancedKeyUsageList|{Client Authentication (1.3.6.1.5.5.7.3.2)}
 DnsNameList|{uaDedicated01}
 SendAsTrustedIssuer|False
 Archived|False
-Extensions|{System.Security.Cryptography.Oid, System.Security.Cryptography.Oid, System.Security.Cryptography.Oid, System.Security.Cryptography.Oid...}
+Extensions|{System.Security.Cryptography.Oid, System.Security.Cryptography.Oid...}
 FriendlyName|uaDedicated01(02)
 IssuerName|System.Security.Cryptography.X509Certificates.X500DistinguishedName
 NotAfter|12/07/2020 14:10:54
