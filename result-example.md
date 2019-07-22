@@ -22,7 +22,7 @@ the certs "hsanchez" and "uaIntro".
 
 every item of $listaC has these attributes:
 ```powershell
-PS C:\Users\me\Documents> $listaC[56]
+$listaC[56]
 ```
 Property|Value
 --------|-----
