@@ -36,7 +36,7 @@ FriendlyName|uaDedicated01(02)
 IssuerName|System.Security.Cryptography.X509Certificates.X500DistinguishedName
 NotAfter|12/07/2020 14:10:54
 NotBefore|13/07/2018 14:10:54
-HasPrivateKey|False ######NOT IMPORTED BY THIS POWERSHELL SCRIPT
+HasPrivateKey|False (NOT IMPORTED BY THIS POWERSHELL SCRIPT)
 PrivateKey| 
 PublicKey|System.Security.Cryptography.X509Certificates.PublicKey
 RawData|{18, ...}
