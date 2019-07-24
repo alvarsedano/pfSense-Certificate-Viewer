@@ -13,12 +13,12 @@ internal-ca|31|uaDevice(2)|{uaDevice}|uaDevice|
 internal-ca|32|fperez|{fperez}|fperez|
 internal-ca|32|uaExit(2)|{uaExit}|uaExit|
 
-This is the last part of the result returned by the script: It shows duplicated SerialNumbers 2F, 30, 31 and 32
-To avoid issues when some of this certs is revoked, you must revoked all them, and recreate new certs for every user involved.
+This is the last part of the result returned by the script: It shows duplicated SerialNumbers 2F, 30, 31 and 32.
+To avoid issues when some of this certs is revoked, you must revoke all them, and recreate new certs for every user involved.
 (Please remember do not delete any issued certificate. You must revoke it and if you want, unlink from the user).
 
-As example: The execution result shows that the "city1" and "audit03" certs are revoked in the "revocados" CRL.
-But due to the duplicity of SerialNumbers, the openVPN tunnel that uses "revocados" as CRL also will consider revoked
+As an example: The execution result shows that the certificates "city1" and "audit03" have been revoked in the CRL "revocados".
+But due to the duplicity of SerialNumbers, the openVPN tunnel that uses "revocados" as CRL, also will consider revoked
 the certs "hsanchez" and "uaIntro".
 
 every item of $listaC has these attributes:
