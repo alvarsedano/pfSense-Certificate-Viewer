@@ -4,7 +4,8 @@
 # Redefine the $cfg string variable to point to a valid non encrypted pfSense XML configuration backup file.
 # You can also pass the command line FilePath parameter as path to the input XML cfg file.
 
-# The script will return the CA certificates, Server certificates, User certificated (used or not used) and duplicate Serial Number Certificates
+# The script will return the CA certificates, Server certificates, User certificates (used or not used) and
+# duplicated Serial Number Certificates.
 #
 # Tested on PowerShell 5 and avobe
 # Created by Alvaro Sedano Galindo. al_sedano@hotmail.com
