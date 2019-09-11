@@ -6,4 +6,6 @@ Si se revoca alguno de estos certificados con SN duplicado, y están en uso en o
 nos llevaremos la sorpresa de haber revocado más de lo deseado. Esta herramienta encuentra
 esas duplicidades de SN usando como entrada un backup XML de configuración de pfSense no cifrado.
 
-ültimo cambio 2017/07/21: Nueva funcionalidad: Ahora muestra en qué CRL(s) está referenciado el certificado.
+2017/07/21: Nueva funcionalidad: Ahora muestra en qué CRL(s) está referenciado el certificado.
+
+Último cambio 2019/09/11: Nueva funcionalidad: Ahora también se pueden descifrar archivos de configuración XML. Para hacerlo hay que disponer de openssl.exe. Por defecto el script lo buscara en la carpeta de instalación de openVPN.
