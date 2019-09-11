@@ -1,13 +1,13 @@
 ####
-### Extracting pfSense Certificates (without private key)
+### pfSense Certificate Viewer (without private key)
+### Version 1.0.3
 ####
 # Redefine the $cfg string variable to point to a valid non encrypted pfSense XML configuration backup file.
 # You can also pass the command line FilePath parameter as path to the input XML cfg file.
 
-# The script will return the CA certificates, Server certificates, User certificates (used or not used) and
-# duplicated Serial Number Certificates.
+# This script will return the CA certificates, Server certificates, User certificates (used or not) and duplicated Serial Number Certificates
 #
-# Tested on PowerShell 5 and avobe
+# Tested on PowerShell 5.0 and avobe
 # Created by Alvaro Sedano Galindo. al_sedano@hotmail.com
 #
 
@@ -19,7 +19,6 @@
                         ValueFromPipelineByPropertyName=$true)]
         [Alias("File")]
         [string]$FilePath)
-
 
 
 Function Get-CN {
@@ -62,7 +61,6 @@ Function Add-Lista {
     }
 }
 
-
 #
 # BODY
 #
@@ -82,8 +80,8 @@ if (-not (Test-Path -Path $cfg)) {
     Exit 1
 }
 
-#Read XML pfSense config file
-[xml]$fxml = Get-Content $cfg -Encoding Default
+#Read XML pfSense config file (UTF8 enconding)
+[xml]$fxml = Get-Content $cfg -Encoding UTF8
 
 #Get the CRL revocation list
 [DateTime]$time0 = '1970-01-01'
@@ -98,7 +96,7 @@ Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.ca) -fromCA $true
 
 #Add user/server certificates to $listaC (WITHOUT private keys)
 Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.cert) -fromCA $false
-#Note: User Certificates created with old pfSense versions can set the EnhancedKeyUsageList property to <empty>
+#Note: User Certificates created with old pfSense versions could set the EnhancedKeyUsageList property to <empty>.
 
 Remove-Variable fxml, r
 
