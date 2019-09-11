@@ -10,4 +10,4 @@ También mostrará los certificados de CA, servidor y usuario.
 
 2017/07/21: Nueva funcionalidad: Ahora muestra en qué CRL(s) está referenciado el certificado.
 
-Último cambio 2019/09/11: Nueva funcionalidad: Ahora también se pueden descifrar archivos de configuración XML. Para hacerlo hay que disponer de openssl.exe. Por defecto el script lo buscará en la carpeta de instalación de openVPN.
+Último cambio 2019/09/11: Nueva funcionalidad: Se pueden descifrar archivos de configuración XML. Para hacerlo hay que disponer de openssl.exe. Por defecto el script lo buscará en la carpeta de instalación de openVPN. Se puede definir la ruta a openssl.exe si fuera necesario.
