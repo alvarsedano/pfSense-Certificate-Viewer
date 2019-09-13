@@ -1,6 +1,6 @@
 ####
 ### pfSense Certificate Viewer (without private key)
-### Version 1.0.5
+### Version 1.0.6
 ####
 # Redefine the $cfg string variable to point to a valid unecrypted pfSense Configuration XML file.
 # You can also use the command line FilePath parameter as path to the input XML cfg file
@@ -13,21 +13,23 @@
 
 #[CmdletBinding()]
     Param (
-        [Parameter(Mandatory=$false,
-                   Position=0,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$false `
+                  ,Position=0 `
+                  ,ValueFromPipeline=$true `
+                  ,ValueFromPipelineByPropertyName=$true)]
         [Alias("File")]
         [string]$FilePath)
 
 
 Function Get-BeginEndWO {
-    Param([Parameter(Mandatory=$true, Position=0)][string]$path)
+    Param([Parameter(Mandatory=$true, Position=0)][string]$path `
+         ,[Parameter(Mandatory=$true, Position=1)][ref]$osslDec)
 
     #OPNsense saves on the xml encrypted file information about how to decrypt it.
     #pfSense does'nt.
 
-    #Check if "^Version: OPNsense" exists in the line 2
+    #First line is #0
+    #Check if "^Version: OPNsense" exists in #line 1
     [string[]]$text = Get-Content $path -Encoding UTF8
     if ($text[1] -match '^Version: OPNsense') {
         [int]$start = 5
@@ -35,6 +37,27 @@ Function Get-BeginEndWO {
     else {
         [int]$start = 1
     }
+
+    #Match for "^Cipher: " in #line 2
+    if ($text[2] -match '^Cifer: (?<cipher>.*)$') {
+        # found
+        [string]$cipher = ($Matches['cipher']).ToLower()
+    }
+    else {
+        [string]$cipher = 'aes-256-cbc'
+    }
+        
+    #Match for "^Hash: " in #line 3
+    if ($text[3] -match '^Hash: (?<hash>.*)$') {
+        # found
+        [string]$hash = ($Matches['hash']).ToLower()
+    }
+    else {
+        [string]$hash = 'md5'
+    }
+
+    #Decrypt array
+    $osslDec.Value = [string[]]($cipher, $hash)
 
     #Remove 1st and last lines
     $text[$start..($text.Count-2)]
@@ -83,7 +106,8 @@ Function Add-Lista {
 Function Decrypt {
     Param([Parameter(Mandatory=$true,Position=0)][string]$fileIn
          ,[Parameter(Mandatory=$true,Position=1)][string]$fileOut
-         ,[Parameter(Mandatory=$false,Position=2)][string]$pass)
+         ,[Parameter(Mandatory=$true, Position=2)][ref]$osslDec
+         ,[Parameter(Mandatory=$false,Position=3)][string]$pass)
 
     # If $openSSL is not '', we will look for the openSSL.exe available with openVPN install.
     # You can define a value for $openSSL if you have a valid openssl executable path.
@@ -93,7 +117,7 @@ Function Decrypt {
         [string]$rutaREG = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\OpenVPN"
         if (-not (Test-Path($rutaREG))) {
             Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. ' + `
-                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 90.' -BackgroundColor DarkRed
+                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 114.' -BackgroundColor DarkRed
             Exit 3
         }
         
@@ -105,7 +129,9 @@ Function Decrypt {
         $pass = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pwd))
     }
 
-    & "$($openSSL)" enc -d -aes-256-cbc -in "$($fileIn)" -out "$($fileOut)" -salt -md md5 -k ''$($pass)''
+    [string]$cipher = ($osslDec.Value)[0]
+    [string]$hash   = ($osslDec.Value)[1]
+    & "$($openSSL)" enc -d -$($cipher) -in "$($fileIn)" -out "$($fileOut)" -salt -md $($hash) -k ''$($pass)''
 }
 
 Function Get-ConfigFile {
@@ -127,12 +153,13 @@ Function Get-ConfigFile {
 
     if ($encrypted -eq $true) {
         #Encrypted xml file
-        [string[]]$cifrado = Get-BeginEndWO -path $filePath
+        [string[]]$osslDec = $null
+        [string[]]$cifrado = Get-BeginEndWO -path $filePath -osslDec ([ref]$osslDec)
         $f1Cin  = New-TemporaryFile
         $f1Cou  = New-TemporaryFile
         try {
             [IO.File]::WriteAllBytes($f1Cin.FullName, [System.Convert]::FromBase64String($cifrado))
-            Decrypt -fileIn $f1Cin.FullName -fileOut $f1Cou.FullName
+            Decrypt -fileIn $f1Cin.FullName -fileOut $f1Cou.FullName -osslDec ([ref]$osslDec)
 
             # Check if file exists
             if (-not (Test-Path $f1Cou.FullName) -or (Get-Item $f1Cou.FullName).Length -eq 0) {
