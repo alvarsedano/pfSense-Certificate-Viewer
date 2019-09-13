@@ -1,6 +1,6 @@
 ####
 ### pfSense Certificate Viewer (without private key)
-### Version 1.0.4
+### Version 1.0.5
 ####
 # Redefine the $cfg string variable to point to a valid unecrypted pfSense Configuration XML file.
 # You can also use the command line FilePath parameter as path to the input XML cfg file
@@ -22,12 +22,22 @@
 
 
 Function Get-BeginEndWO {
-    Param([Parameter(Mandatory=$true, Position=0)]
-          [string]$path)
+    Param([Parameter(Mandatory=$true, Position=0)][string]$path)
 
+    #OPNsense saves on the xml encrypted file information about how to decrypt it.
+    #pfSense not.
+
+    #Check if "^Version: OPNsense" exists in the line 2
     [string[]]$text = Get-Content $path -Encoding UTF8
+    if ($text[1] -match '^Version: OPNsense') {
+        [int]$start = 5
+    }
+    else {
+        [int]$start = 1
+    }
+
     #Remove 1st and last lines
-    $text[1..($text.Count-2)]
+    $text[$start..($text.Count-2)]
 }
 
 Function Get-CN {
@@ -70,7 +80,6 @@ Function Add-Lista {
     }
 }
 
-
 Function Decrypt {
     Param([Parameter(Mandatory=$true,Position=0)][string]$fileIn
          ,[Parameter(Mandatory=$true,Position=1)][string]$fileOut
@@ -83,8 +92,9 @@ Function Decrypt {
         #Look for openvpn installation
         [string]$rutaREG = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\OpenVPN"
         if (-not (Test-Path($rutaREG))) {
-            Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. If you have another openssl.exe available path, you can redefine the $openSSL variable at line 81.' -BackgroundColor DarkRed
-            Exit (3)
+            Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. ' + `
+                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 90.' -BackgroundColor DarkRed
+            Exit 3
         }
         
         $openSSL = ((Get-ItemProperty -Path $rutaREG).exe_path).Replace("openvpn.exe", "openssl.exe")
@@ -134,7 +144,7 @@ Function Get-ConfigFile {
             $xml.Value = Get-Content $f1Cou.FullName -Encoding UTF8
         }
         catch {
-            Write-Host "Bad password. Process stoped." -BackgroundColor DarkRed
+            Write-Host "Error decrypting xml file: Bad password. Process stoped." -BackgroundColor DarkRed
             Exit 5
         }
         finally {
@@ -165,22 +175,33 @@ else {
 [xml]$fxml = $null
 Get-ConfigFile -filePath $cfg -xml ([ref]$fxml)
 
+#Check for pfSense/OPNsense products
+if ($fxml.ChildNodes.Count -eq 2) {
+    [System.Xml.XmlElement]$product = $fxml.ChildNodes[1]
+    if ($product.Name -notin ('pfsense','opnsense')) {
+        Write-Host 'The xml file does not contains a pfSense or OPNsense backup. Process stoped.' -BackgroundColor DarkRed
+        Exit 6
+    }
+}
+
+Remove-Variable fxml
+
 #Get the CRL revocation list
 [DateTime]$time0 = '1970-01-01'
 [array]$listaR = @()
-foreach($r in $fxml.pfsense.crl) {
+foreach($r in $product.crl) {
     $listaR += $r.cert | Select @{N='listRev';E={$r.descr.'#cdata-section'}}, caref, refid, reason, @{N='revDate';E={$time0.AddSeconds($_.revoke_time)}}
 }
 
 #Add CA Certificates to $listaC (WITHOUT private keys)
 [array]$listaC = @()
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.ca) -fromCA $true
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true
 
 #Add user/server certificates to $listaC (WITHOUT private keys)
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$fxml.pfsense.cert) -fromCA $false
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.cert) -fromCA $false
 #Note: User Certificates created with old pfSense versions could set the EnhancedKeyUsageList property to <empty>.
 
-Remove-Variable fxml
+#Remove-Variable product
 
 #List of CA Certificates
 Write-Output "`nCA Certificates"
