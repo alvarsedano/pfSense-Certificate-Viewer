@@ -201,7 +201,7 @@ Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true
 Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.cert) -fromCA $false
 #Note: User Certificates created with old pfSense versions could set the EnhancedKeyUsageList property to <empty>.
 
-#Remove-Variable product
+Remove-Variable product
 
 #List of CA Certificates
 Write-Output "`nCA Certificates"
