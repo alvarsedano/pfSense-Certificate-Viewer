@@ -1,3 +1,4 @@
+## Visor de certificados pfSense/OPNsense
 Script Powershell. Visor de certificados de pfSense/OPNsense
 
 A veces pasa (no debería) en pfSense que se crean certificados con SerialNumber
