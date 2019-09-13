@@ -2,7 +2,7 @@
 ### pfSense Certificate Viewer (without private key)
 ### Version 1.0.5
 ####
-# Redefine the $cfg string variable to point to a valid unecrypted pfSense Configuration XML file.
+# Please, redefine the $cfg string variable to point to a valid unecrypted pfSense Configuration XML file.
 # You can also use the command line FilePath parameter as path to the input XML cfg file
 
 # This script will return the CA certificates, Server certificates, User certificates (used or not) and duplicated Serial Number Certificates
@@ -24,7 +24,7 @@
 Function Get-BeginEndWO {
     Param([Parameter(Mandatory=$true, Position=0)][string]$path)
 
-    #OPNsense saves on the xml encrypted file information about how to decrypt it.
+    #OPNsense saves information on how to decrypt it in the xml encrypted file.
     #pfSense does'nt.
 
     #Check if "^Version: OPNsense" exists in the line 2
@@ -205,16 +205,16 @@ Remove-Variable product
 
 #List of CA Certificates
 Write-Output "`nCA Certificates"
-$listaC | Where-Object {$_.isCA} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject | Sort-Object -Property sIssuer, SerialNumber | ft
+$listaC | Where-Object {$_.isCA} | Select-Object sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject | Sort-Object -Property sIssuer, SerialNumber | ft
 
 #List of Server Certificates
 Write-Output "`nServer Certificates"
-$listaC | Where-Object {$_.isServer} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
+$listaC | Where-Object {$_.isServer} | Select-Object sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
 
 #List of User Certificates (not CA and not Server)
 Write-Output "`nUser Certificates"
-$listaC | Where-Object {-not ($_.isCA -or $_.isServer)} | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
+$listaC | Where-Object {-not ($_.isCA -or $_.isServer)} | Select-Object sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Sort-Object -Property sIssuer, SerialNumber | ft
 
 #List of Dupicated SerialNumbers (per CA)
 Write-Output "`nDuplicated Serial Numbers (per CA)"
-$listaC | Select sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Group-Object -Property sIssuer, SerialNumber | Where-Object {$_.Count -gt 1} | Select -ExpandProperty Group | ft
+$listaC | Select-Object sIssuer, SerialNumber, FriendlyName, DnsNameList, sSubject, revokedOn | Group-Object -Property sIssuer, SerialNumber | Where-Object {$_.Count -gt 1} | Select -ExpandProperty Group | ft
