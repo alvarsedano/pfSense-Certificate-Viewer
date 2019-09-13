@@ -1,5 +1,5 @@
 ## pfSense-Certificate-Viewer
-Powershell script: pfSense Certificate Viewer
+Powershell script: pfSense/OPNsense Certificate Viewer
 
 Sometimes it happens in pfSense that certificates are created with
 duplicated SerialNumbers (in the same CAroot). If any of these certificates
