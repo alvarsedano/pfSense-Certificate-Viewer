@@ -13,4 +13,6 @@ También mostrará los certificados de CA, servidor y usuario.
 
 2019/09/11: Nueva funcionalidad: Se pueden descifrar archivos de configuración XML. Para hacerlo hay que disponer de openssl.exe. Por defecto el script lo buscará en la carpeta de instalación de openVPN. Se puede definir la ruta a openssl.exe si fuera necesario.
 
-Último cambio 2019/09/13: También admite archivos de backup OPNsense (cifrados y no cifrados)
+2019/09/13: También admite archivos de backup OPNsense (cifrados y no cifrados)
+
+Último cambio 2019/09/13: Se utiliza la cabecera de descifrado de backups de OPNsense para llamar a openssl. En la versión anterior se asumía siempre aes-256-cbc/md5 (asumidos todavía para pfSense, por no contener cabecera de descifrado).
