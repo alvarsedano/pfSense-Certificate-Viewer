@@ -25,7 +25,7 @@ Function Get-BeginEndWO {
     Param([Parameter(Mandatory=$true, Position=0)][string]$path)
 
     #OPNsense saves on the xml encrypted file information about how to decrypt it.
-    #pfSense not.
+    #pfSense does'nt.
 
     #Check if "^Version: OPNsense" exists in the line 2
     [string[]]$text = Get-Content $path -Encoding UTF8
