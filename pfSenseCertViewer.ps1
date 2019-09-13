@@ -2,10 +2,12 @@
 ### pfSense Certificate Viewer (without private key)
 ### Version 1.0.5
 ####
-# Please, redefine the $cfg string variable to point to a valid unecrypted pfSense Configuration XML file.
+# Redefine the $cfg string variable to point to a valid pfSense Configuration XML file.
 # You can also use the command line FilePath parameter as path to the input XML cfg file
 
-# This script will return the CA certificates, Server certificates, User certificates (used or not) and duplicated Serial Number Certificates
+# This script will return the CA certificates, Server certificates, User certificates (used or not)
+# and duplicated Serial Number Certificates. If as result of errors generating serialnumber certificates,
+# duplicated serialnumber certs (from the same CA) will be reported.
 #
 # Tested on PowerShell 5.0 and avobe
 # Created by Alvaro Sedano Galindo. al_sedano@hotmail.com
@@ -93,7 +95,7 @@ Function Decrypt {
         [string]$rutaREG = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\OpenVPN"
         if (-not (Test-Path($rutaREG))) {
             Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. ' + `
-                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 90.' -BackgroundColor DarkRed
+                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 92.' -BackgroundColor DarkRed
             Exit 3
         }
         
