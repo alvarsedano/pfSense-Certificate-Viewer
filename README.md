@@ -1,4 +1,4 @@
-## pfSense-Certificate-Viewer
+## pfSense/OPNsense Certificate Viewer
 Powershell script: pfSense/OPNsense Certificate Viewer
 
 Sometimes it happens in pfSense that certificates are created with
