@@ -137,7 +137,7 @@ Function Decrypt {
         [string]$rutaREG = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\OpenVPN"
         if (-not (Test-Path($rutaREG))) {
             Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. ' + `
-                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 92.' -BackgroundColor DarkRed
+                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 144.' -BackgroundColor DarkRed
             Exit 3
         }
         
