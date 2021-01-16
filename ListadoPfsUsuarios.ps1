@@ -239,7 +239,7 @@ if ($fxml.ChildNodes.Count -eq 2) {
         Exit 6
     }
 }
-#Remove-Variable fxml -ErrorAction SilentlyContinue
+Remove-Variable fxml -ErrorAction SilentlyContinue
 
 
 #Get the CRL revocation list
@@ -263,13 +263,13 @@ foreach($a in $listaU) {
 
 #Add CA Certificates to $listaC (WITHOUT private keys)
 [array]$listaC = @()
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true -isOpnSense $($product.Name -eq 'opnsense')
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true
 
 #Add user/server certificates to $listaC (WITHOUT private keys)
 Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.cert) -fromCA $false -isOpnSense $($product.Name -eq 'opnsense')
 #Note: User Certificates created with old pfSense versions can set the EnhancedKeyUsageList property to <empty>
 
-#Remove-Variable product, r, listaR, listaU, listaG -ErrorAction SilentlyContinue
+Remove-Variable product, r, listaR, listaU, listaG -ErrorAction SilentlyContinue
 
 ###
 ### Ruta de archivo CSV destino (delimitado por punto y coma)
