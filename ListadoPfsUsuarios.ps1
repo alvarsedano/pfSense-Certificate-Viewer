@@ -40,7 +40,8 @@ Function Get-CN {
 Function Add-Lista {
     Param([Parameter(Mandatory=$true)][ref]$lista `
          ,[Parameter(Mandatory=$true)][ref]$obj `
-         ,[Parameter(Mandatory=$true)][bool]$fromCA)
+         ,[Parameter(Mandatory=$true)][bool]$fromCA `
+         ,[Parameter(Mandatory=$false)][bool]$isOpnsense=$false)
 
     [string]$oidCLI = '1.3.6.1.5.5.7.3.2'
     [string]$oidSRV = '1.3.6.1.5.5.7.3.1'
@@ -86,7 +87,12 @@ Function Add-Lista {
         # Load User Properties
         $ndx = $listaU.name.Indexof($objTmp.sSubject)
         if ($ndx -gt -1) {
-            $objTmp.Usuario = [System.Web.HttpUtility]::HtmlDecode(($listaU[$ndx]).descr.'#cdata-section')
+            if ($isOpnsense -eq $true) {
+                $objTmp.Usuario = $listaU[$ndx].descr
+            }
+            else {
+                $objTmp.Usuario = [System.Web.HttpUtility]::HtmlDecode(($listaU[$ndx]).descr.'#cdata-section')
+            }
             $objTmp.Udisabled = ($listaU[$ndx]).disabled
             [string[]]$strGrp = @()
             foreach ($grp in $listaG) {
@@ -137,10 +143,9 @@ Function Decrypt {
         [string]$rutaREG = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\OpenVPN"
         if (-not (Test-Path($rutaREG))) {
             Write-Host 'No openvpn installation found. openssl.exe is part of the openVPN installation. ' + `
-                       'If you have another openssl.exe available path, you can redefine the $openSSL variable at line 144.' -BackgroundColor DarkRed
+                       'If you have another openssl.exe available path, you can redefine the $openSSL variable (line# 140).' -BackgroundColor DarkRed
             Exit 3
         }
-        
         $openSSL = ((Get-ItemProperty -Path $rutaREG).exe_path).Replace("openvpn.exe", "openssl.exe")
     }
 
@@ -234,7 +239,7 @@ if ($fxml.ChildNodes.Count -eq 2) {
         Exit 6
     }
 }
-Remove-Variable fxml -ErrorAction SilentlyContinue
+#Remove-Variable fxml -ErrorAction SilentlyContinue
 
 
 #Get the CRL revocation list
@@ -258,13 +263,13 @@ foreach($a in $listaU) {
 
 #Add CA Certificates to $listaC (WITHOUT private keys)
 [array]$listaC = @()
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.ca) -fromCA $true -isOpnSense $($product.Name -eq 'opnsense')
 
 #Add user/server certificates to $listaC (WITHOUT private keys)
-Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.cert) -fromCA $false
+Add-Lista -lista ([ref]$listaC) -obj ([ref]$product.cert) -fromCA $false -isOpnSense $($product.Name -eq 'opnsense')
 #Note: User Certificates created with old pfSense versions can set the EnhancedKeyUsageList property to <empty>
 
-Remove-Variable product, r, listaR, listaU, listaG -ErrorAction SilentlyContinue
+#Remove-Variable product, r, listaR, listaU, listaG -ErrorAction SilentlyContinue
 
 ###
 ### Ruta de archivo CSV destino (delimitado por punto y coma)
