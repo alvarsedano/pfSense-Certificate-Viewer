@@ -50,10 +50,9 @@ Function Add-Lista {
     [System.Security.Cryptography.X509Certificates.X509Certificate2]$ccc = $null
     foreach($c in $obj.Value) {
         $ccc = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($c.crt))
-        $ccc.FriendlyName = [System.Web.HttpUtility]::HtmlDecode($c.descr.'#cdata-section')
-        $objTmp = $ccc | Select *, @{N='IsCA';       E={ $fromCA }} `
-                                  , @{N='IsServer';  E={ -not $fromCA -and $_.EnhancedKeyUsageList.ObjectId -contains $oidSRV }} `
-                                  , @{N='IsClient';  E={ -not $fromCA -and $_.EnhancedKeyUsageList.ObjectId -contains $oidCLI }} `
+        $objTmp = $ccc | Select *, @{N='isCA';       E={ $fromCA -and $_.Extensions.CertificateAuthority -eq $true }} `
+                                  , @{N='isServer';  E={ -not $fromCA -and $_.Extensions.EnhancedKeyUsages.Value -contains $oidSRV }} `
+                                  , @{N='isClient';  E={ -not $fromCA -and $_.Extensions.EnhancedKeyUsages.Value -contains $oidCLI }} `
                                   , @{N='sIssuer';   E={ Get-CN($_.Issuer)}}, @{N='sSubject';E={Get-CN($_.Subject) }} `
                                   , @{N='refid';     E={ $c.refid}} `
                                   , @{N='isRevoked'; E={ -not $fromCA -and $c.refid -in $revs}} `
@@ -66,6 +65,13 @@ Function Add-Lista {
                                   , @{N='Usuario' ;  E={ [string]$null }} `
                                   , @{N='UGrupos' ;  E={ [string[]]$null }}
 
+        if ($isOpnsense -eq $true) {
+            $objTmp.FriendlyName = $c.descr
+        }
+        else {
+            $objTmp.FriendlyName = [System.Web.HttpUtility]::HtmlDecode($c.descr.'#cdata-section')
+        }
+
 
         # Revocation Lists
         if ($objTmp.isRevoked) {
@@ -76,7 +82,6 @@ Function Add-Lista {
                     #$objTmp.revDate =  # No guarda array. El último revocado reescribe el anterior
                     if ($d.revDate -ne $null) {
                         $objTmp.revDateDT = [datetime]::SpecifyKind($d.revDate,'UTC').ToLocalTime()
-                        #$objTmp.revDateDT = $d.revDate.ToLocalTime()
                         $objTmp.revDate = $objTmp.revDateDT.ToString('yyyy/MM/dd HH:mm:ss')
                     }
                 }
