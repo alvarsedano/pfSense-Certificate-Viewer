@@ -17,7 +17,7 @@ CA roots, server certificates and user certificates will also be displayed.
 
 Last change 2019/09/13: The OPNSense decrypt header is used to call openssl.
 
-Thanks to [pippin](https://forum.netgate.com/user/pippin) for show me the links to the pfSense docummented issue:
+Thanks to [pippin](https://forum.netgate.com/user/pippin) for showing me the links to the pfSense docummented issue:
 
 https://redmine.pfsense.org/issues/3694
 
